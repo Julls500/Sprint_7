@@ -1,0 +1,3 @@
+Курьер зарегистрирован, {'login': 'rxtspoiflx', 'password': 'midhalrxoo', 'firstName': 'hhkjnevllh'}
+Курьер залогинился, получен id:465011
+Курьер удален

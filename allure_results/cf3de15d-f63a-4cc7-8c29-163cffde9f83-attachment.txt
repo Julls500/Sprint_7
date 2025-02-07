@@ -1,0 +1,2 @@
+Курьер зарегистрирован, {'login': 'mwlrvicuvo', 'password': 'rsgfrgxvvv', 'firstName': 'uhrvmbizlt'}
+Курьер залогинился, получен id:465018
