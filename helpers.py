@@ -5,6 +5,7 @@ import allure
 import data
 import requests
 import json
+import logging
 
 class Funcs:
 
@@ -32,6 +33,10 @@ class Funcs:
         del payload[param]
         return payload
 
+    @staticmethod
+    def message(message):
+        allure.attach('', message, attachment_type=allure.attachment_type.TEXT)
+        logging.info(message)
 
 class Courier:
 
@@ -51,10 +56,10 @@ class Courier:
         courier = Courier.generate_courier_payload()
         response = Request.post(config.CREATE_COURIER_PATH, courier)
         if response.status_code == 201:
-            print(f'Курьер зарегистрирован, {courier}')
+            Funcs.message(f'Курьер зарегистрирован, {courier}')
             return courier
         else:
-            print(f'Курьер не зарегистрирован: {response.status_code}, {response.text}.')
+            Funcs.message(f'Курьер не зарегистрирован: {response.status_code}, {response.text}.')
 
     @staticmethod
     @allure.step('Логин курьера в системе, проверка успешного ответа и получение id курьера для дальнейшего использования.')
@@ -64,10 +69,10 @@ class Courier:
         response = Request.post(config.COURIER_LOGIN_PATH, courier)
         if response.status_code == 200:
             courier_id = response.json().get('id')
-            print(f'Курьер залогинился, получен id:{courier_id}')
+            Funcs.message(f'Курьер залогинился, получен id:{courier_id}')
             return courier_id
         else:
-            print(f'Курьер не залогинился: {response.status_code}, {response.text}.')
+            Funcs.message(f'Курьер не залогинился: {response.status_code}, {response.text}.')
 
     @staticmethod
     @allure.step('Регистрация курьера, логин и получение его ID')
@@ -85,9 +90,9 @@ class Courier:
         path = config.DELETE_COURIER_PATH + str(courier_id)
         response = Request.delete(path, payload)
         if response.status_code != 200:
-            print(f'Курьер не удален: {response.status_code}, {response.text}.')
+            Funcs.message(f'Курьер не удален: {response.status_code}, {response.text}.')
         else:
-            print('Курьер удален')
+            Funcs.message('Курьер удален')
 
     @staticmethod
     @allure.step('Удаление курьера из системы по payload и проверка успешного ответа.')
@@ -101,9 +106,9 @@ class Courier:
         path = f'{config.ACCEPT_ORDER_PATH}{order_track}?courierId={courier_id}'
         response = Request.put_no_payload(path)
         if response.status_code != 200:
-            return print(f'Заказ не принят курьером: {response.status_code}, {response.text}.')
+            Funcs.message(f'Заказ не принят курьером: {response.status_code}, {response.text}.')
         else:
-            print('Заказ принят курьером')
+            Funcs.message('Заказ принят курьером')
 
 
 class Order:
@@ -116,11 +121,11 @@ class Order:
         response = Request.post(config.CREATE_ORDER_PATH, order)
         if response.status_code == 201:
             order_track = response.json().get('track')
-            print(f'Заказ создан, track: {order_track}')
+            Funcs.message(f'Заказ создан, track: {order_track}')
             Order.check_order_is_in_the_system(order_track)
             return order_track
         else:
-            print(f'Заказ не создан: {response.status_code}, {response.text}.')
+            Funcs.message(f'Заказ не создан: {response.status_code}, {response.text}.')
 
     @staticmethod
     @allure.step('Создание заказа с рандомным именем заказчика и получение его номера')
@@ -133,25 +138,31 @@ class Order:
         response = Request.post(config.CREATE_ORDER_PATH, order)
         if response.status_code == 201:
             order_track = response.json().get('track')
-            print(f'Заказ создан, track: {order_track}')
+            Funcs.message(f'Заказ создан, track: {order_track}')
             return order_track
         else:
-            print(f'Заказ не создан: {response.status_code}, {response.text}.')
+            Funcs.message(f'Заказ не создан: {response.status_code}, {response.text}.')
 
     @staticmethod
     @allure.step('Проверка наличия заказа в системе, поиск по номеру.')
     def check_order_is_in_the_system(order_track):
         order_search = Request.get(f'{config.GET_ORDER_BY_TRACK}{order_track}')
         if order_search.status_code != 200 or order_search.json().get('order').get('track') != order_track:
-            print(f'Заказ в системе не найден,{order_search.status_code}, {order_search.text}')
+            Funcs.message(f'Заказ в системе не найден,{order_search.status_code}, {order_search.text}')
         else:
-            print(f'Заказ {order_track} найден в системе')
+            Funcs.message(f'Заказ {order_track} найден в системе')
 
     @staticmethod
-    @allure.step('Получение списка полей из json Список заказов')
-    def params_list(param):
-        return param.get('orders')[0].keys()
-
+    @allure.step('Отмена заказа по номеру.')
+    def cancel_order(track):
+        payload = {
+            "track": track
+            }
+        response = Request.put(config.CANCEL_ORDER_PATH, payload)
+        if response.status_code != 200 and response.status_code != 409:
+            Funcs.message(f'Заказ не отменен: {response.status_code}, {response.text}.')
+        else:
+            Funcs.message('Заказ отменен')
 
 class Request:
 
@@ -166,14 +177,14 @@ class Request:
         return requests.delete(config.URL_SERVICE + path, headers=data.headers, data=json.dumps(payload))
 
     @staticmethod
-    @allure.step('PUT request.')
-    def put(path, payload):
-        return requests.put(config.URL_SERVICE + path, headers=data.headers, data=json.dumps(payload))
-
-    @staticmethod
     @allure.step('PUT request без payload')
     def put_no_payload(path):
         return requests.put(config.URL_SERVICE + path)
+
+    @staticmethod
+    @allure.step('PUT request')
+    def put(path, payload):
+        return requests.put(config.URL_SERVICE + path, headers=data.headers, data=json.dumps(payload))
 
     @staticmethod
     @allure.step('GET request.')

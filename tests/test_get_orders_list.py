@@ -16,7 +16,7 @@ class TestGetOrdersList:
         path = f'{config.COURIER_ORDERS}{courier_id}'
         response = Request.get(path)
         assert response.status_code == 200, f'Ожидалось: 200 OK, получено {response.status_code}, {response.text}'
-        assert len(response.json().get('orders')) == 1, f'Количество принятых курьером заказов не 1, {response.json().get('orders')}'
+        assert len(response.json().get('orders')) == 1, f'Количество принятых курьером заказов не 1, {response.json().get("orders")}'
         actual_order_track = response.json()['orders'][0]["track"]
         assert actual_order_track == order_confirmed, f'Номер принятого заказа не совпадает с номером заказа в ответе. Ожидалось: {order_confirmed} , получено {actual_order_track}, {response.text}'
 
@@ -37,11 +37,13 @@ class TestGetOrdersList:
         path = f'{config.COURIER_ORDERS}{courier_id}&nearestStation=["{expected_station_1}"]'
         response = Request.get(path)
         assert response.status_code == 200, f'Ожидалось: 200 OK, получено {response.status_code}, {response.text}'
-        assert len(response.json().get('orders')) == 1, f'Количество принятых курьером заказов на станции {expected_station_1} не 1, {response.json().get('orders')}'
+        assert len(response.json().get('orders')) == 1, f'Количество принятых курьером заказов на станции {expected_station_1} не 1, {response.json().get("orders")}'
         actual_station = response.json()['orders'][0]['metroStation']
         assert actual_station == expected_station_1, f'Станция метро в ответе не совпадает с ожидаемой. Ожидалось {expected_station_1}, получено {actual_station}'
         actual_order_track = response.json()['orders'][0]["track"]
         assert actual_order_track == order_track_1, f'Номер принятого заказа на станции {expected_station_1} не совпадает с номером заказа в ответе. Ожидалось: {order_track_1} , получено {actual_order_track}'
+        Order.cancel_order(order_track_1)
+        Order.cancel_order(order_track_2)
 
     @allure.title('Ошибка 404 Not Found при запросе на получение активных/завершенных заказов курьера с несуществующим ID курьера.')
     @allure.description('Отправляем GET запрос на ручку /api/v1/orders?courierId=IDКурьера с несуществующим ID. Проверяем что ответ 404 Not Found,'

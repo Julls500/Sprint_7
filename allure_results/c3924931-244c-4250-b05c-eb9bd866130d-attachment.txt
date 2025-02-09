@@ -1,3 +1,0 @@
-Курьер зарегистрирован, {'login': 'qvyprvhtgy', 'password': 'cgykpzpbxo', 'firstName': 'vawqivrzua'}
-Курьер залогинился, получен id:465019
-Курьер не удален: 404, {"code":404,"message":"Курьера с таким id нет."}.

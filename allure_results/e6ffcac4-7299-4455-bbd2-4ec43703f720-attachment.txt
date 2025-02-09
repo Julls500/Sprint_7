@@ -1,7 +1,0 @@
-Курьер зарегистрирован, {'login': 'ivjhonpjag', 'password': 'cdcortuvoy', 'firstName': 'tikvfeevce'}
-Курьер залогинился, получен id:465004
-Курьер зарегистрирован, {'login': 'rdcrirnfjk', 'password': 'kdsjoxfupk', 'firstName': 'sjhrpprjcz'}
-Курьер залогинился, получен id:465005
-Заказ создан, track: 882712
-Заказ 882712 найден в системе
-Курьер удален

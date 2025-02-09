@@ -1,3 +1,0 @@
-Курьер зарегистрирован, {'login': 'bbwjvwttbu', 'password': 'yhgytcoebb', 'firstName': 'kzwhpfywoq'}
-Курьер залогинился, получен id:465007
-Курьер удален

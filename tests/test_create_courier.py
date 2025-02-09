@@ -1,6 +1,7 @@
 import config
 from helpers import Funcs, Courier, Request
 import allure
+import pytest
 
 class TestCreateCourier:
 
@@ -27,23 +28,14 @@ class TestCreateCourier:
         assert response.status_code == 201, f'Ожидалось: 201 Created, получено {response.status_code} {response.text}'
         assert response.json() == expected_response_body, f'Ожидалось: {expected_response_body}, получено {response.json()}'
 
-    @allure.title('Ошибка 400 Bad Request при регистрации курьера без обязательного поля "login" и с валидными "firstName" и "password".')
-    @allure.description('Генерируем данные курьера фикстурой courier_data,'
-                        ' убираем "login", отправлям POST запрос на ручку /api/v1/courier,'
+    @allure.title('Ошибка 400 Bad Request при регистрации курьера без обязательного поля "password" или "login" и с валидным "firstName".')
+    @allure.description('Параметрический тест, проверяющий появление ошибки при регистрации курьера без обязательного поля "password" или "login".'
+                        'Генерируем данные курьера, изменяем на "" один из обязательных парметров и отправлям POST запрос на ручку /api/v1/courier,'
                         ' проверяем, что ответ 400 Bad Request и тело ответа {"message": "Недостаточно данных для создания учетной записи"}.')
-    def test_create_courier_no_login_shows_error_400(self, courier_data):
-        Funcs.change_payload_param(courier_data, 'login', "")
-        response = Request.post(config.CREATE_COURIER_PATH, courier_data)
-        expected_response_text = "Недостаточно данных для создания учетной записи"
-        assert response.status_code == 400, f'Ожидалось: 400 Bad Request, получено {response.status_code} {response.text}'
-        assert response.json()["message"] == expected_response_text, f'Ожидалось: {expected_response_text}, получено {response.json()}'
-
-    @allure.title('Ошибка 400 Bad Request при регистрации курьера без обязательного поля "password" и с валидными "firstName" и "login".')
-    @allure.description('Генерируем данные курьера фикстурой courier_data,'
-                        ' убираем "password", отправлям POST запрос на ручку /api/v1/courier,'
-                        ' проверяем, что ответ 400 Bad Request и тело ответа {"message": "Недостаточно данных для создания учетной записи"}.')
-    def test_create_courier_no_password_shows_error_400(self, courier_data):
-        Funcs.change_payload_param(courier_data, 'password', "")
+    @pytest.mark.parametrize('key_to_change', ['login', 'password'])
+    def test_create_courier_without_required_param_shows_error_400(self, key_to_change):
+        courier_data = Courier.generate_courier_payload()
+        Funcs.change_payload_param(courier_data, key_to_change, "")
         response = Request.post(config.CREATE_COURIER_PATH, courier_data)
         expected_response_text = "Недостаточно данных для создания учетной записи"
         assert response.status_code == 400, f'Ожидалось: 400 Bad Request, получено {response.status_code} {response.text}'

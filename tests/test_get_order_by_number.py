@@ -7,7 +7,8 @@ class TestGetOrderByNumber:
 
     @allure.title('200 OK успешное получение делатей заказа по его валидному номеру.')
     @allure.description('Создаем заказ и получаем его номер. Отправляем GET запрос на ручку /api/v1/orders/track?t=Track.'
-                        ' Проверяем что ответ 200 OK, json содержит ожидаемый список полей и номер заказа в ответе совпадает с запрашиваемым')
+                        ' Проверяем что ответ 200 OK, json содержит ожидаемый список полей и номер заказа в ответе совпадает с запрашиваемым.'
+                        ' Затем заказ отменяется.')
     def test_get_order_by_number_valid_order_success_200(self):
         expected_track =  Order.create_order_and_get_track()
         expected_params_list = data.get_order_by_number_details.get('order').keys()
@@ -18,6 +19,7 @@ class TestGetOrderByNumber:
         assert actual_params_list == expected_params_list, f'Ожидалось: {expected_params_list}, получено {actual_params_list}'
         actual_order_track = response.json().get('order').get('track')
         assert actual_order_track == expected_track, f'Номер заказа в ответе не совпадает с запрашиваемым. Ожидалось {expected_track}, получено {actual_order_track}, {response.json()}'
+        Order.cancel_order(expected_track)
 
     @allure.title('Ошибка 400 Bad Request при запросе на получение делатей заказа без номера заказа.')
     @allure.description('Отправляем GET запрос на ручку /api/v1/orders/track?t= без номера заказа. Проверяем что ответ 400 Bad Request'

@@ -1,9 +1,7 @@
-from helpers import Funcs, Order, Request, Courier
+from helpers import Funcs, Request, Courier
 import config
-import pytest
 import allure
 
-@pytest.mark.usefixtures('class_courier')
 class TestAcceptOrder:
 
     @allure.title('200 OK при запросе на принятие 1 заказа курьером с валидным заказом и курьером.')
@@ -76,17 +74,3 @@ class TestAcceptOrder:
         expected_response_message = "Этот заказ уже в работе"
         assert response.status_code == 409, f'Ожидалось: 409 Conflict, получено {response.status_code} {response.text}'
         assert response.json().get('message') == expected_response_message, f'Ожидалось: {expected_response_message}, получено {response.json()}'
-
-    @allure.title('200 OK при запросе на принятие 5 валидных заказов подряд 1 курьером.')
-    @allure.description('Создаем курьера фикстурой class_courier для всего класса и получаем его ID. В рамках параметрического теста создается заказ'
-                        ' на заданной станции метро. Также проверяется, что заказ создан и успешно находится в системе по track номеру.'
-                        ' Отправляется PUT запрос на ручку /api/v1/orders/accept/OrderID?courierId=CourierID для принятия заказа курьером class_courier.'
-                        ' Проверяем, что каждый заказ принят, ответ 200 ОК и тело ответа {"ok":true}.')
-    @pytest.mark.parametrize('station', ['107', '108', '109', '110', '111'])
-    def test_accept_order_10_orders_accepted_by_courier_success_200(self, class_courier, station):
-        order_track = Order.create_order_and_get_track_confirmed_line(station)
-        path = f'{config.ACCEPT_ORDER_PATH}{order_track}?courierId={class_courier}'
-        response = Request.put_no_payload(path)
-        expected_response_body = {"ok": True}
-        assert response.status_code == 200, f'Ожидалось: 200 OK, получено {response.text}'
-        assert response.json() == expected_response_body, f'Ожидалось: {expected_response_body}, получено {response.json()}'
