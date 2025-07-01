@@ -5,7 +5,7 @@ import data
 
 class TestGetOrderByNumber:
 
-    @allure.title('200 OK успешное получение делатей заказа по его валидному номеру.')
+    @allure.title('200 OK успешное получение деталей заказа по его валидному номеру.')
     @allure.description('Создаем заказ и получаем его номер. Отправляем GET запрос на ручку /api/v1/orders/track?t=Track.'
                         ' Проверяем что ответ 200 OK, json содержит ожидаемый список полей и номер заказа в ответе совпадает с запрашиваемым.'
                         ' Затем заказ отменяется.')
@@ -21,7 +21,7 @@ class TestGetOrderByNumber:
         assert actual_order_track == expected_track, f'Номер заказа в ответе не совпадает с запрашиваемым. Ожидалось {expected_track}, получено {actual_order_track}, {response.json()}'
         Order.cancel_order(expected_track)
 
-    @allure.title('Ошибка 400 Bad Request при запросе на получение делатей заказа без номера заказа.')
+    @allure.title('Ошибка 400 Bad Request при запросе на получение деталей заказа без номера заказа.')
     @allure.description('Отправляем GET запрос на ручку /api/v1/orders/track?t= без номера заказа. Проверяем что ответ 400 Bad Request'
                         ' и сообщение в теле ответа "Недостаточно данных для поиска"')
     def test_get_order_by_number_no_order_number_shows_error_400(self):
@@ -31,7 +31,7 @@ class TestGetOrderByNumber:
         actual_message = response.json()["message"]
         assert actual_message == expected_message, f'Ожидалось {expected_message}, получено {actual_message}, {response.json()}'
 
-    @allure.title('Ошибка 404 Not Found при запросе на получение делатей заказа с несуществующим номером заказа.')
+    @allure.title('Ошибка 404 Not Found при запросе на получение деталей заказа с несуществующим номером заказа.')
     @allure.description('Отправляем GET запрос на ручку /api/v1/orders/track?t= с несуществующим номером заказа.'
                         ' Проверяем что ответ 404 Not Found и сообщение в теле ответа "Заказ не найден"')
     def test_get_order_by_number_not_valid_order_number_shows_error_404(self):
